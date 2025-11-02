@@ -7,15 +7,31 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.model_selection import train_test_split
 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv()
+
+# Access environment variables
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION")
+
+
+MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI")
+
 # -------------------------------
 # 1. Configuration
 # -------------------------------
 
 # Path to CSV dataset (replace with your local or S3 path)
-DATA_PATH = "data/raw/resumes.csv"  # CSV with 'category' & 'resume' columns
+DATA_PATH = r"C:\Users\umarh\OneDrive\New folder\APK  fies\Documents\mlo\Resume-Matcher\src\app\resumes.csv"
+  # CSV with 'category' & 'resume' columns
 
 # MLflow tracking URI (EC2-hosted)
-MLFLOW_URI = "http://<EC2_PUBLIC_IP>:5000"  # Replace with your EC2 public IP
+MLFLOW_URI = "http://13.49.65.146:5000" 
+ # Replace with your EC2 public IP
 
 # TF-IDF parameters
 MAX_FEATURES = 5000
@@ -39,11 +55,11 @@ def clean_text(text: str) -> str:
 df = pd.read_csv(DATA_PATH)
 
 # Check required columns
-if not {"category", "resume"}.issubset(df.columns):
+if not {"Category", "Resume"}.issubset(df.columns):
     raise ValueError("CSV must have 'category' and 'resume' columns.")
 
-df["resume_clean"] = df["resume"].apply(clean_text)
-categories = df["category"].unique().tolist()
+df["resume_clean"] = df["Resume"].apply(clean_text)
+categories = df["Category"].unique().tolist()
 resumes = df["resume_clean"].tolist()
 
 # -------------------------------
@@ -93,5 +109,8 @@ with mlflow.start_run(run_name="TFIDF_Cosine_Model_v1"):
 
     print("✅ TF-IDF vectorizer and similarity matrix logged to MLflow.")
     print("Average similarity:", avg_similarity)
+
+
+
 
 print("✅ Training complete and MLflow run finished.")
